@@ -9,12 +9,17 @@ confDir = $confDir ||= File.expand_path("~/.homestead")
 
 homesteadYamlPath = confDir + "/Homestead.yaml"
 homesteadJsonPath = confDir + "/Homestead.json"
+additionalConfigPath = confDir + "/config.rb"
 afterScriptPath = confDir + "/after.sh"
 aliasesPath = confDir + "/aliases"
 
 require File.expand_path(File.dirname(__FILE__) + '/scripts/homestead.rb')
 
 Vagrant.require_version '>= 1.8.4'
+
+if File.exist? additionalConfigPath then
+    require additionalConfigPath
+end
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     if File.exist? aliasesPath then
@@ -31,6 +36,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     end
 
     Homestead.configure(config, settings)
+
+    if File.exist? additionalConfigPath then
+        Homestead.additionalConfig(config)
+    end
 
     if File.exist? afterScriptPath then
         config.vm.provision "shell", path: afterScriptPath, privileged: false
